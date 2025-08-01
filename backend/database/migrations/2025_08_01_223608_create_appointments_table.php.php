@@ -13,10 +13,18 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->dateTime('scheduled_date');
-            $table->string('location');
-            $table->text('notes')->nullable();
+            $table->string('protocol')->unique();
+            $table->string('full_name');
+            $table->string('street');
+            $table->string('number');
+            $table->string('neighborhood');
+            $table->string('city');
+            $table->date('suggested_date');
+            $table->string('phone');
+            $table->string('email')->nullable();
+            $table->enum('status', ['Pending', 'Scheduled', 'Completed', 'Cancelled'])->default('Pending');
+            $table->text('status_observation')->nullable();
+            $table->timestamp('status_updated_at')->nullable();
             $table->timestamps();
         });
     }
