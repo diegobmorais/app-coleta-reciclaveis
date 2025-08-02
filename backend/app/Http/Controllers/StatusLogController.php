@@ -17,6 +17,6 @@ class StatusLogController extends Controller
     {
         $logs = $this->statusLogService->listByAppointment($appointmentId);
 
-        return response()->json($logs);
+        return response()->json($logs, 200);
     }
 }

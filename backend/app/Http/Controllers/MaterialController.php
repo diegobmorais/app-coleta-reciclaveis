@@ -21,7 +21,7 @@ class MaterialController extends Controller
         $filters = $request->only(['search', 'sort_by', 'sort_dir', 'per_page']);
         $materials = $this->service->getMaterials($filters);
 
-        return response()->json($materials);
+        return response()->json($materials,200);
     }
 
     public function store(StoreMaterialRequest $request)
@@ -32,18 +32,18 @@ class MaterialController extends Controller
 
     public function show(Material $material)
     {
-        return response()->json($material);
+        return response()->json($material, 200);
     }
 
     public function update(StoreMaterialRequest $request, Material $material)
     {
         $material = $this->service->updateMaterial($material, $request->validated());
-        return response()->json($material);
+        return response()->json($material, 200);
     }
 
     public function destroy(Material $material)
     {
         $this->service->deleteMaterial($material);
-        return response()->json(['message' => 'Material removido com sucesso.']);
+        return response()->json(['message' => 'Material removido com sucesso.'], 200);
     }
 }

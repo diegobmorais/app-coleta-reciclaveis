@@ -43,7 +43,7 @@ class AppointmentController extends Controller
         try {
             $appointment = $this->appointmentService->show($id);
 
-            return response()->json(['data' => $appointment]);
+            return response()->json(['data' => $appointment], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Agendamento não encontrado'], 404);
         }
@@ -62,7 +62,7 @@ class AppointmentController extends Controller
             return response()->json([
                 'message' => 'Status atualizado com sucesso',
                 'appointment' => $appointment->load('materials', 'statusLogs'),
-            ]);
+            ], 200);
         } catch (\Throwable $e) {
             return response()->json(['error' => 'Erro ao atualizar status', $e->getMessage()], 500);
         }
@@ -72,7 +72,7 @@ class AppointmentController extends Controller
         try {
             $this->appointmentService->destroy($id);
 
-            return response()->json(['message' => 'Agendamento deletado com sucesso.']);
+            return response()->json(['message' => 'Agendamento deletado com sucesso.'], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Agendamento não encontrado'], 404);
         } catch (\Throwable $e) {
