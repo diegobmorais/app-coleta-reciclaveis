@@ -12,8 +12,8 @@ export const useMaterialStore = defineStore('materials', {
       this.loading = true
       this.error = null
       try {
-        const res = await axios.get('/api/materials')
-        this.materials = res.data
+        const response = await axios.get('/api/materials')
+        this.materials = response.data.data
       } catch (err) {
         this.error = err.response?.data?.message || 'Erro ao carregar materiais'
       } finally {
@@ -22,9 +22,9 @@ export const useMaterialStore = defineStore('materials', {
     },
     async createMaterial(data) {
       try {
-        const res = await axios.post('/api/materials', data)
-        this.materials.push(res.data)
-        return res.data
+        const response = await axios.post('/api/materials', data)
+        this.materials.push(response.data)        
+        return response.data
       } catch (err) {
         this.error = err.response?.data?.message || 'Erro ao criar material'
         throw err
@@ -32,10 +32,10 @@ export const useMaterialStore = defineStore('materials', {
     },
     async updateMaterial(id, data) {
       try {
-        const res = await axios.put(`/api/materials/${id}`, data)
+        const response = await axios.put(`/api/materials/${id}`, data)
         const index = this.materials.findIndex(m => m.id === id)
-        if (index !== -1) this.materials[index] = res.data
-        return res.data
+        if (index !== -1) this.materials[index] = response.data.data
+        return response.data.data
       } catch (err) {
         this.error = err.response?.data?.message || 'Erro ao atualizar material'
         throw err

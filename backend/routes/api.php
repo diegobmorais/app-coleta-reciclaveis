@@ -24,9 +24,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus']);
     
     //materials
-    Route::apiResource('materials', MaterialController::class);
+    Route::apiResource('materials', MaterialController::class)->except('index');
 });
 
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('appointments', [AppointmentController::class, 'store']);
+Route::get('materials', [MaterialController::class, 'index']);

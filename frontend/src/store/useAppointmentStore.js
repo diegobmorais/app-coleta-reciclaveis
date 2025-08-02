@@ -4,6 +4,7 @@ import axios from 'axios'
 export const useAppointmentStore = defineStore('appointments', {
   state: () => ({
     appointments: [],
+    lastAppointment: [],
     currentAppointment: null,
     loading: false,
     error: null
@@ -13,8 +14,8 @@ export const useAppointmentStore = defineStore('appointments', {
       this.loading = true
       this.error = null
       try {
-        const res = await axios.get('/api/appointments')
-        this.appointments = res.data
+        const response = await axios.get('/api/appointments')
+        this.appointments = response.data.data
       } catch (err) {
         this.error = err.response?.data?.message || 'Erro ao carregar agendamentos'
       } finally {
@@ -25,8 +26,9 @@ export const useAppointmentStore = defineStore('appointments', {
       this.loading = true
       this.error = null
       try {
-        const res = await axios.post('/api/appointments', data)
-        return res.data
+        const response = await axios.post('/api/appointments', data)
+        this.lastAppointment = response.data.appointment
+        return response.data
       } catch (err) {
         this.error = err.response?.data?.message || 'Erro ao agendar coleta'
         throw err

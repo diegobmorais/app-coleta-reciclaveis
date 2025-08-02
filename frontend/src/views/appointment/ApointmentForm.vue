@@ -5,13 +5,14 @@
       <h1 class="text-3xl font-bold">Agende sua Coleta de Recicláveis</h1>
       <p class="opacity-90 mt-2">Preencha os dados abaixo para agendar a coleta em sua residência.</p>
     </div>
-
+    <p v-if="errors.form" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6 text-sm">
+      {{ errors.form }}
+    </p>
     <form @submit.prevent="handleSubmit" class="p-8 space-y-8">
-      <!-- Protocolo (gerado ou oculto) -->
+      <!-- Protocolo -->
       <div v-if="form.protocol" class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
         <p class="text-blue-800"><strong>Protocolo:</strong> {{ form.protocol }}</p>
       </div>
-
       <!-- Dados Pessoais -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
@@ -47,7 +48,6 @@
           </div>
         </div>
       </section>
-
       <!-- Endereço -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
@@ -93,7 +93,6 @@
           </div>
         </div>
       </section>
-
       <!-- Coleta -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
@@ -114,19 +113,53 @@
             <p v-if="errors.suggested_date" class="text-red-500 text-sm mt-1">{{ errors.suggested_date }}</p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Materiais para Coleta *</label>
-            <div class="max-h-32 overflow-y-auto border rounded-lg p-3 bg-gray-50 space-y-2">
-              <label v-for="material in materialStore.materials" :key="material.id"
-                class="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 p-1 rounded text-sm">
-                <input type="checkbox" :value="material.id" v-model="form.material_ids"
-                  class="h-4 w-4 text-green-600 focus:ring-green-500" />
-                <span>{{ material.name }} <em class="text-gray-500">({{ material.category }})</em></span>
-              </label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Materiais para Coleta *
+            </label>
+            <!-- Dropdown Controlado -->
+            <div ref="dropdownRef" class="relative">
+              <button type="button" @click="toggleDropdown"
+                class="w-full text-left px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
+                <span v-if="form.material_id.length === 0" class="text-gray-500">Selecione os materiais...</span>
+                <span v-else>
+                  {{ selectedLabels }}
+                </span>
+              </button>
+              <!-- Painel de opções -->
+              <div v-show="isOpen"
+                class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                @click.stop>
+                <!-- Carregando -->
+                <div v-if="materialStore.loading" class="p-4 text-center text-sm text-gray-500">
+                  Carregando materiais...
+                </div>
+                <!-- Erro -->
+                <div v-else-if="materialStore.error" class="p-4 text-sm text-red-600 bg-red-50">
+                  {{ materialStore.error }}
+                </div>
+                <!-- Lista de materiais -->
+                <template v-else>
+                  <div class="p-2 space-y-1">
+                    <label v-for="material in materialStore.materials" :key="material.id"
+                      class="flex items-center space-x-3 px-3 py-2 cursor-pointer hover:bg-green-50 rounded text-sm">
+                      <input type="checkbox" :value="material.id" v-model="form.material_id"
+                        class="h-4 w-4 text-green-600 rounded focus:ring-green-500" @change.stop />
+                      <span class="flex-1">
+                        {{ material.name }}
+                        <em class="text-gray-500 text-xs">({{ material.category }})</em>
+                      </span>
+                    </label>
+                    <p v-if="materialStore.materials.length === 0" class="p-4 text-center text-gray-500 text-sm">
+                      Nenhum material cadastrado.
+                    </p>
+                  </div>
+                </template>
+              </div>
             </div>
-            <p v-if="errors.material_ids" class="text-red-500 text-sm mt-1">{{ errors.material_ids }}</p>
+            <!-- Mensagem de erro -->
+            <p v-if="errors.material_id" class="text-red-500 text-sm mt-1">{{ errors.material_id }}</p>
           </div>
         </div>
-
         <div class="mt-6">
           <label class="block text-sm font-medium text-gray-700 mb-1">Observações (opcional)</label>
           <textarea v-model="form.observation" rows="3"
@@ -134,8 +167,6 @@
             placeholder="Ex: Deixar na portaria, horário comercial, etc."></textarea>
         </div>
       </section>
-
-      <!-- Botão -->
       <div class="text-center pt-4">
         <button type="submit" :disabled="loading"
           class="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white font-bold py-3 px-10 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-60 disabled:transform-none">
@@ -147,21 +178,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAppointmentStore } from '@/store/appointments'
-import { useMaterialStore } from '@/store/materials'
+import { useAppointmentStore } from '@/store/useAppointmentStore'
+import { useMaterialStore } from '@/store/useMaterialStore'
 
 const router = useRouter()
 const appointmentStore = useAppointmentStore()
 const materialStore = useMaterialStore()
 
-// Carregar materiais
 materialStore.fetchMaterials()
 
-// Formulário com todos os campos
 const form = reactive({
-  protocol: '', // Pode ser preenchido depois ou oculto
+  protocol: '',
   full_name: '',
   street: '',
   number: '',
@@ -171,81 +200,134 @@ const form = reactive({
   phone: '',
   email: '',
   observation: '',
-  material_ids: []
+  material_id: []
 })
 
 const errors = ref({})
 const loading = ref(false)
+const isOpen = ref(false)
+const dropdownRef = ref()
 
-// Validação
+const toggleDropdown = () => {
+  isOpen.value = !isOpen.value
+  if (isOpen.value && materialStore.materials.length === 0 && !materialStore.loading) {
+    materialStore.fetchMaterials()
+  }
+}
+
+const selectedLabels = computed(() => {
+  const selected = materialStore.materials.filter(m => form.material_id.includes(m.id))
+  if (selected.length === 0) return ''
+  if (selected.length === 1) return selected[0].name
+  return `${selected.length} - Materiais Selecionados`
+})
+
+const handleClickOutside = (event) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+    isOpen.value = false
+  }
+}
+
 const validate = () => {
   errors.value = {}
   let isValid = true
 
-  if (!form.full_name.trim()) {
-    errors.value.full_name = 'Nome completo é obrigatório'
+  const requiredFields = {
+    full_name: 'Nome completo é obrigatório.',
+    street: 'Logradouro é obrigatório.',
+    number: 'Número é obrigatório.',
+    neighborhood: 'Bairro é obrigatório.',
+    city: 'Cidade é obrigatória.',
+    suggested_date: 'Data sugerida é obrigatória.',
+    phone: 'Telefone é obrigatório.'
+  }
+
+  Object.keys(requiredFields).forEach(field => {
+    const value = form[field]
+    if (!value || (typeof value === 'string' && !value.trim())) {
+      errors.value[field] = requiredFields[field]
+      isValid = false
+    }
+  })
+
+  if (form.phone && !/^\(\d{2}\) \d{5}-\d{4}$/.test(form.phone)) {
+    errors.value.phone = 'Telefone inválido. Use o formato (11) 98765-4321.'
     isValid = false
   }
 
-  if (!form.street.trim()) {
-    errors.value.street = 'Logradouro é obrigatório'
-    isValid = false
-  }
-  if (!form.number.trim()) {
-    errors.value.number = 'Número é obrigatório'
-    isValid = false
-  }
-  if (!form.neighborhood.trim()) {
-    errors.value.neighborhood = 'Bairro é obrigatório'
-    isValid = false
-  }
-  if (!form.city.trim()) {
-    errors.value.city = 'Cidade é obrigatória'
-    isValid = false
+  if (form.suggested_date) {
+    const selectedDate = new Date(form.suggested_date)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const minDate = new Date(today)
+    let daysAdded = 0
+    while (daysAdded < 2) {
+      minDate.setDate(minDate.getDate() + 1)
+      const dayOfWeek = minDate.getDay()
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        daysAdded++
+      }
+    }
+
+    if (selectedDate < minDate) {
+      const minDateStr = minDate.toLocaleDateString('pt-BR')
+      errors.value.suggested_date = `A data deve ser pelo menos ${minDateStr}.`
+      isValid = false
+    }
   }
 
-  if (!form.suggested_date) {
-    errors.value.suggested_date = 'Data sugerida é obrigatória'
-    isValid = false
-  }
-
-  if (!form.phone.trim() || !/^\(\d{2}\) \d{5}-\d{4}$/.test(form.phone)) {
-    errors.value.phone = 'Telefone inválido (ex: (11) 98765-4321)'
-    isValid = false
-  }
-
-  if (form.material_ids.length === 0) {
-    errors.value.material_ids = 'Selecione ao menos um material'
+  if (!form.material_ids || form.material_ids.length === 0) {
+    errors.value.material_ids = 'Selecione ao menos um material.'
     isValid = false
   }
 
   return isValid
 }
 
-// Enviar formulário
 const handleSubmit = async () => {
   if (!validate()) return
 
   loading.value = true
   try {
-    // Mapeia os campos para o backend
     const payload = {
       ...form,
       date: form.suggested_date,
-      name: form.full_name,
-      address: `${form.street}, ${form.number} - ${form.neighborhood}, ${form.city}`
     }
-
     await appointmentStore.createAppointment(payload)
     router.push('/success')
   } catch (err) {
-    // Erro já tratado no store
+    if (err.response?.status === 422) {
+      const validationErrors = err.response.data.errors
+
+      Object.keys(validationErrors).forEach(field => {
+
+        const formField = {
+          full_name: 'full_name',
+          street: 'street',
+          number: 'number',
+          neighborhood: 'neighborhood',
+          city: 'city',
+          suggested_date: 'suggested_date',
+          phone: 'phone',
+          email: 'email',
+          observation: 'observation',
+          material_ids: 'material_id'
+        }[field]
+
+        if (formField) {
+          errors.value[formField] = validationErrors[field][0]
+        }
+      })
+    }
+    else {
+      errors.value.form = err.response?.data?.message || 'Erro ao enviar o formulário. Tente novamente.'
+    }
   } finally {
     loading.value = false
   }
 }
 
-// Máscara de telefone (opcional)
 const formatPhone = (e) => {
   let value = e.target.value.replace(/\D/g, '')
   if (value.length <= 11) {
@@ -254,4 +336,11 @@ const formatPhone = (e) => {
   }
   form.phone = value
 }
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>

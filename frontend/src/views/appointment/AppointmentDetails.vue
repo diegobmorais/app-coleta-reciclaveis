@@ -33,7 +33,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAppointmentStore } from '@/store/appointments'
+import { useAppointmentStore } from '@/store/useAppointmentStore'
 
 const route = useRoute()
 const router = useRouter()

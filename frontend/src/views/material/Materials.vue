@@ -141,7 +141,7 @@
 
 <script setup>
 import { onMounted, ref, reactive } from 'vue'
-import { useMaterialStore } from '@/store/materials'
+import { useMaterialStore } from '@/store/useMaterialStore'
 
 const materialStore = useMaterialStore()
 

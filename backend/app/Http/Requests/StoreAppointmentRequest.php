@@ -33,16 +33,18 @@ class StoreAppointmentRequest extends FormRequest
             'suggested_date' => ['required', 'date', 'after_or_equal:' . $minDate],
             'phone' => ['required', 'string', 'regex:/^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/'],
             'email' => ['nullable', 'email'],
-            'materials' => ['required', 'array', 'min:1'],
-            'materials.*' => ['exists:materials,id'],
+            'material_id' => ['required', 'array', 'min:1'],
+            'material_id.*' => ['exists:materials,id'],
         ];
     }
     public function messages(): array
     {
         return [
+            'full_name.required' => 'Nome é obrigatório!',
+            'full_name.string' => 'Nome não deve possuir caracteres especiais ou numeros',
             'suggested_date.after_or_equal' => 'A data deve ser pelo menos 2 dias úteis após a data atual.',
-            'materials.required' => 'É necessário selecionar ao menos um tipo de material reciclável.',
-            'materials.*.exists' => 'Um ou mais tipos de materiais selecionados são inválidos.',
+            'material_id.required' => 'É necessário selecionar ao menos um tipo de material reciclável.',
+            'material_id.*.exists' => 'Um ou mais tipos de materiais selecionados são inválidos.',
             'phone.regex' => 'Formato de telefone inválido.',
         ];
     }

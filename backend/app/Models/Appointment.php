@@ -19,8 +19,9 @@ class Appointment extends Model
         'suggested_date',
         'phone',
         'email',
-        'status',
         'observation',
+        'status',        
+        'status_observation',
         'status_updated_at',
     ];
 

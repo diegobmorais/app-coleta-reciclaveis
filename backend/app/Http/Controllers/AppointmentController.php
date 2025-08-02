@@ -58,11 +58,12 @@ class AppointmentController extends Controller
                 'suggested_date' => $request->suggested_date,
                 'phone' => $request->phone,
                 'email' => $request->email,
+                'observation' => $request->observation,
                 'status' => Appointment::STATUS_PENDENTE,
-                'observation' => $request->observation
+                'status_observation' => null                
             ]);
 
-            $appointment->materials()->sync($request->materials);
+            $appointment->materials()->sync($request->material_id);
 
             //cria log de agendamento
             StatusLog::create([
@@ -76,9 +77,7 @@ class AppointmentController extends Controller
 
             return response()->json([
                 'message' => 'Agendamento realizado com sucesso!',
-                'protocol' => $appointment->protocol,
-                'suggested_date' => $appointment->suggested_date,
-                'appointment' => $appointment->load('materials'),
+                'appointment' => $appointment->load('materials')
             ], 201);
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -112,7 +111,7 @@ class AppointmentController extends Controller
          
             $appointment->statusLogs()->create([
                 'status' => $request->status,
-                'observation' => $request->observation ?? null,
+                'status_observation' => $request->observation ?? null,
                 'changed_at' => Carbon::now(),
                 'user_id' => auth()->id(),
             ]);

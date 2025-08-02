@@ -103,8 +103,8 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAppointmentStore } from '@/store/appointments'
-import { useAuthStore } from '@/store/auth'
+import { useAppointmentStore } from '@/store/useAppointmentStore'
+import { useAuthStore } from '@/store/useAuthStore'
 
 const router = useRouter()
 const appointmentStore = useAppointmentStore()
