@@ -22,7 +22,7 @@ return new class extends Migration
             $table->date('suggested_date');
             $table->string('phone');
             $table->string('email')->nullable();
-            $table->enum('status', ['Pendente', 'Em Andamento', 'Concluido', 'Cancelado'])->default('Pendente');
+            $table->enum('status', ['Pendente', 'Agendado', 'Concluído', 'Cancelado'])->default('Pendente');
             $table->text('observation')->nullable();
             $table->timestamp('status_updated_at')->nullable();
             $table->timestamps();

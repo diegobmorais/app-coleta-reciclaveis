@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAppointmentRequest;
+use App\Http\Requests\UpdateAppointmentStatusRequest;
 use App\Models\Appointment;
 use App\Models\StatusLog;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Str;
 
@@ -13,9 +16,22 @@ class AppointmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::with('materials')->latest()->paginate(10);
+        $query = Appointment::with('materials');
+
+        if ($request->filled('suggested_date')) {
+            $query->whereDate('suggested_date', $request->suggested_date);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $query->orderBy('suggested_date', 'asc');
+
+        $appointments = $query->paginate(10);
+
         return response()->json($appointments);
     }
 
@@ -23,7 +39,7 @@ class AppointmentController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(StoreAppointmentRequest $request)
-    {  
+    {
         DB::beginTransaction();
 
         try {
@@ -82,37 +98,34 @@ class AppointmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreAppointmentRequest $request, $id)
+    public function updateStatus(UpdateAppointmentStatusRequest $request, $id)
     {
         $appointment = Appointment::findOrFail($id);
 
         DB::beginTransaction();
 
-        try {
-            $appointment->update([
-                'full_name' => $request->full_name,
-                'street' => $request->street,
-                'number' => $request->number,
-                'neighborhood' => $request->neighborhood,
-                'city' => $request->city,
-                'suggested_date' => $request->suggested_date,
-                'phone' => $request->phone,
-                'email' => $request->email,
+        try {          
+            $appointment->status = $request->status;
+            $appointment->observation = $request->observation;
+            $appointment->status_updated_at = Carbon::now();
+            $appointment->save();
+         
+            $appointment->statusLogs()->create([
+                'status' => $request->status,
+                'observation' => $request->observation ?? null,
+                'changed_at' => Carbon::now(),
+                'user_id' => auth()->id(),
             ]);
-
-            if ($request->has('materials')) {
-                $appointment->materials()->sync($request->materials);
-            }
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Agendamento atualizado com sucesso!',
-                'appointment' => $appointment->load('materials'),
+                'message' => 'Status atualizado com sucesso',
+                'appointment' => $appointment->load('materials', 'statusLogs'),
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Erro ao atualizar agendamento.'], 500);
+            return response()->json(['error' => 'Erro ao atualizar status', $e->getMessage()], 500);
         }
     }
 

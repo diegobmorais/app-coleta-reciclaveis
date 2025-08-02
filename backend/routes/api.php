@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MaterialController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,7 +17,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:sanctum')->group(function () {
- //
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    //appointmets
+    Route::apiResource('appointments', AppointmentController::class)->except(['store']);
+    Route::patch('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus']);
+    
+    //materials
+    Route::apiResource('materials', MaterialController::class);
 });
-//public routes
-Route::apiResource('appointments', AppointmentController::class);
+
+
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('appointments', [AppointmentController::class, 'store']);

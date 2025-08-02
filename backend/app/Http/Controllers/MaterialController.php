@@ -1,49 +1,36 @@
-<?php
-
+<?php 
 namespace App\Http\Controllers;
 
 use App\Models\Material;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreMaterialRequest;
 
 class MaterialController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return Material::all();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreMaterialRequest $request)
     {
-        //
+        $material = Material::create($request->validated());
+        return response()->json($material, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Material $material)
     {
-        //
+        return $material;
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Material $material)
+    public function update(StoreMaterialRequest $request, Material $material)
     {
-        //
+        $material->update($request->validated());
+        return response()->json($material);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Material $material)
     {
-        //
+        $material->delete();
+        return response()->json(['message' => 'Material removido com sucesso.']);
     }
 }
