@@ -196,7 +196,7 @@ onMounted(() => {
 
 const logout = () => {
     authStore.logout()   
-    router.push('/login')
+    router.push('/')
 }
 
 const getStatusColor = (status) => {
