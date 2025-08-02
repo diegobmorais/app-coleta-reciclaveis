@@ -1,0 +1,257 @@
+<template>
+  <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200 pt-20">
+    <!-- Cabeçalho -->
+    <div class="bg-gradient-to-r from-green-600 to-emerald-500 text-white px-8 py-6">
+      <h1 class="text-3xl font-bold">Agende sua Coleta de Recicláveis</h1>
+      <p class="opacity-90 mt-2">Preencha os dados abaixo para agendar a coleta em sua residência.</p>
+    </div>
+
+    <form @submit.prevent="handleSubmit" class="p-8 space-y-8">
+      <!-- Protocolo (gerado ou oculto) -->
+      <div v-if="form.protocol" class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+        <p class="text-blue-800"><strong>Protocolo:</strong> {{ form.protocol }}</p>
+      </div>
+
+      <!-- Dados Pessoais -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <span class="bg-green-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </span>
+          Dados Pessoais
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
+            <input v-model="form.full_name"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Seu nome completo" />
+            <p v-if="errors.full_name" class="text-red-500 text-sm mt-1">{{ errors.full_name }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
+            <input v-model="form.phone" @input="formatPhone"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="(11) 98765-4321" />
+            <p v-if="errors.phone" class="text-red-500 text-sm mt-1">{{ errors.phone }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+            <input v-model="form.email" type="email"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="seu@email.com" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Endereço -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <span class="bg-blue-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </span>
+          Endereço
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Logradouro *</label>
+            <input v-model="form.street"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Ex: Rua das Flores" />
+            <p v-if="errors.street" class="text-red-500 text-sm mt-1">{{ errors.street }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Número *</label>
+            <input v-model="form.number" type="text"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="123" />
+            <p v-if="errors.number" class="text-red-500 text-sm mt-1">{{ errors.number }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Bairro *</label>
+            <input v-model="form.neighborhood"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Jardim Primavera" />
+            <p v-if="errors.neighborhood" class="text-red-500 text-sm mt-1">{{ errors.neighborhood }}</p>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Cidade *</label>
+            <input v-model="form.city"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="São Paulo" />
+            <p v-if="errors.city" class="text-red-500 text-sm mt-1">{{ errors.city }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Coleta -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <span class="bg-purple-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+          </span>
+          Detalhes da Coleta
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Data Sugerida *</label>
+            <input v-model="form.suggested_date" type="date"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500" />
+            <p v-if="errors.suggested_date" class="text-red-500 text-sm mt-1">{{ errors.suggested_date }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Materiais para Coleta *</label>
+            <div class="max-h-32 overflow-y-auto border rounded-lg p-3 bg-gray-50 space-y-2">
+              <label v-for="material in materialStore.materials" :key="material.id"
+                class="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 p-1 rounded text-sm">
+                <input type="checkbox" :value="material.id" v-model="form.material_ids"
+                  class="h-4 w-4 text-green-600 focus:ring-green-500" />
+                <span>{{ material.name }} <em class="text-gray-500">({{ material.category }})</em></span>
+              </label>
+            </div>
+            <p v-if="errors.material_ids" class="text-red-500 text-sm mt-1">{{ errors.material_ids }}</p>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Observações (opcional)</label>
+          <textarea v-model="form.observation" rows="3"
+            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="Ex: Deixar na portaria, horário comercial, etc."></textarea>
+        </div>
+      </section>
+
+      <!-- Botão -->
+      <div class="text-center pt-4">
+        <button type="submit" :disabled="loading"
+          class="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white font-bold py-3 px-10 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-60 disabled:transform-none">
+          {{ loading ? 'Enviando...' : 'Agendar Coleta' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAppointmentStore } from '@/store/appointments'
+import { useMaterialStore } from '@/store/materials'
+
+const router = useRouter()
+const appointmentStore = useAppointmentStore()
+const materialStore = useMaterialStore()
+
+// Carregar materiais
+materialStore.fetchMaterials()
+
+// Formulário com todos os campos
+const form = reactive({
+  protocol: '', // Pode ser preenchido depois ou oculto
+  full_name: '',
+  street: '',
+  number: '',
+  neighborhood: '',
+  city: '',
+  suggested_date: '',
+  phone: '',
+  email: '',
+  observation: '',
+  material_ids: []
+})
+
+const errors = ref({})
+const loading = ref(false)
+
+// Validação
+const validate = () => {
+  errors.value = {}
+  let isValid = true
+
+  if (!form.full_name.trim()) {
+    errors.value.full_name = 'Nome completo é obrigatório'
+    isValid = false
+  }
+
+  if (!form.street.trim()) {
+    errors.value.street = 'Logradouro é obrigatório'
+    isValid = false
+  }
+  if (!form.number.trim()) {
+    errors.value.number = 'Número é obrigatório'
+    isValid = false
+  }
+  if (!form.neighborhood.trim()) {
+    errors.value.neighborhood = 'Bairro é obrigatório'
+    isValid = false
+  }
+  if (!form.city.trim()) {
+    errors.value.city = 'Cidade é obrigatória'
+    isValid = false
+  }
+
+  if (!form.suggested_date) {
+    errors.value.suggested_date = 'Data sugerida é obrigatória'
+    isValid = false
+  }
+
+  if (!form.phone.trim() || !/^\(\d{2}\) \d{5}-\d{4}$/.test(form.phone)) {
+    errors.value.phone = 'Telefone inválido (ex: (11) 98765-4321)'
+    isValid = false
+  }
+
+  if (form.material_ids.length === 0) {
+    errors.value.material_ids = 'Selecione ao menos um material'
+    isValid = false
+  }
+
+  return isValid
+}
+
+// Enviar formulário
+const handleSubmit = async () => {
+  if (!validate()) return
+
+  loading.value = true
+  try {
+    // Mapeia os campos para o backend
+    const payload = {
+      ...form,
+      date: form.suggested_date,
+      name: form.full_name,
+      address: `${form.street}, ${form.number} - ${form.neighborhood}, ${form.city}`
+    }
+
+    await appointmentStore.createAppointment(payload)
+    router.push('/success')
+  } catch (err) {
+    // Erro já tratado no store
+  } finally {
+    loading.value = false
+  }
+}
+
+// Máscara de telefone (opcional)
+const formatPhone = (e) => {
+  let value = e.target.value.replace(/\D/g, '')
+  if (value.length <= 11) {
+    value = value.replace(/^(\d{2})(\d)/g, '($1) $2')
+    value = value.replace(/(\d{5})(\d)/, '$1-$2')
+  }
+  form.phone = value
+}
+</script>
