@@ -102,6 +102,7 @@ onMounted(() => {
   if (materialStore.materials.length === 0) {
     materialStore.fetchMaterials()
   }
+  appointmentStore.clearSuccess()
 })
 
 const formatDate = (dateString) => {

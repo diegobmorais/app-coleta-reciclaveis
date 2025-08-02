@@ -5,7 +5,7 @@ export const useAppointmentStore = defineStore('appointments', {
   state: () => ({
     appointments: [],
     lastAppointment: [],
-    currentAppointment: null,
+    lastSuccess: false,
     loading: false,
     error: null
   }),
@@ -16,12 +16,19 @@ export const useAppointmentStore = defineStore('appointments', {
       try {
         const response = await axios.get('/api/appointments')
         this.appointments = response.data.data
+        this.lastSuccess = true
       } catch (err) {
         this.error = err.response?.data?.message || 'Erro ao carregar agendamentos'
       } finally {
         this.loading = false
       }
     },
+    
+    clearSuccess() {
+      this.lastSuccess = false
+      this.lastAppointment = null
+    },
+
     async createAppointment(data) {
       this.loading = true
       this.error = null

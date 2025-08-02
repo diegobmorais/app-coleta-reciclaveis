@@ -5,6 +5,20 @@ import AdminLogin from '../views/admin/AdminLogin.vue'
 import AdminDashboard from '../views/admin/AdminDashboard.vue'
 import AppointmentDetails from '../views/appointment/AppointmentDetails.vue'
 import Materials from '../views/material/Materials.vue'
+import NotFound from '@/views/NotFound.vue'
+// Stores
+import { useAppointmentStore } from '@/store/useAppointmentStore'
+
+// Guard para proteger /success
+const successGuard = (to, from, next) => {
+    const appointmentStore = useAppointmentStore()
+  
+    if (appointmentStore.lastSuccess) {
+      next()
+    } else {
+      next('/')
+    }
+  }
 
 const routes = [
     {
@@ -13,7 +27,8 @@ const routes = [
     },
     {
         path: '/success',
-        component: AppointmentSuccess
+        component: AppointmentSuccess,
+        beforeEnter: successGuard 
     },
     {
         path: '/login',
@@ -34,7 +49,7 @@ const routes = [
         component:
             Materials,
         // meta: { requiresAuth: true }
-    }
+    },  
 ]
 
 const router = createRouter({
