@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Models\Appointment;
+use App\Models\StatusLog;
 use Illuminate\Support\Facades\DB;
 use Str;
 
@@ -22,7 +23,7 @@ class AppointmentController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(StoreAppointmentRequest $request)
-    {
+    {  
         DB::beginTransaction();
 
         try {
@@ -41,9 +42,19 @@ class AppointmentController extends Controller
                 'suggested_date' => $request->suggested_date,
                 'phone' => $request->phone,
                 'email' => $request->email,
+                'status' => Appointment::STATUS_PENDENTE,
+                'observation' => $request->observation
             ]);
 
             $appointment->materials()->sync($request->materials);
+
+            //cria log de agendamento
+            StatusLog::create([
+                'appointment_id' => $appointment->id,
+                'status' => Appointment::STATUS_PENDENTE,
+                'observation' => 'Cidadão solicitou agendamento.',
+                'user_id' => null,
+            ]);
 
             DB::commit();
 

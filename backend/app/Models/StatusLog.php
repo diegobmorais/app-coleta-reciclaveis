@@ -12,14 +12,9 @@ class StatusLog extends Model
     protected $fillable = [
         'appointment_id',
         'status',
-        'observation',
-        'changed_at',
+        'observation',        
         'user_id',
-    ];
-
-    protected $casts = [
-        'changed_at' => 'datetime',
-    ];
+    ];  
 
     public function appointment()
     {

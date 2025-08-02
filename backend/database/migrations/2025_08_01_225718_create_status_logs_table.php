@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('status_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('appointment_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['pending', 'scheduled', 'completed', 'canceled']);
-            $table->text('observation')->nullable();
-            $table->timestamp('changed_at');
+            $table->enum('status', ['Pendente', 'Em Andamento', 'Concluido', 'Cancelado']);
+            $table->text('observation')->nullable();          
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
         });
