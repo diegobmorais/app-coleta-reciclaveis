@@ -1,14 +1,33 @@
-<?php 
+<?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Material;
 use App\Http\Requests\StoreMaterialRequest;
+use Illuminate\Http\Request;
 
 class MaterialController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Material::all();
+        $query = Material::query();
+      
+        if ($search = $request->input('search')) {
+            $query->where('name', 'ILIKE', "%{$search}%")
+                ->orWhere('description', 'ILIKE', "%{$search}%")
+                ->orWhere('category', 'ILIKE', "%{$search}%");
+        }
+     
+        $sortBy = $request->input('sort_by', 'name');
+        $sortDir = $request->input('sort_dir', 'asc');
+
+        if (in_array($sortBy, ['name', 'category', 'created_at']) && in_array($sortDir, ['asc', 'desc'])) {
+            $query->orderBy($sortBy, $sortDir);
+        }
+    
+        $perPage = $request->input('per_page', 10);
+
+        return $query->paginate($perPage);
     }
 
     public function store(StoreMaterialRequest $request)
