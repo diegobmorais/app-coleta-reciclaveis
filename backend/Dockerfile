@@ -27,4 +27,7 @@ RUN chown -R www-data:www-data . \
 # Habilita o mod_rewrite do Apache
 RUN a2enmod rewrite
 
+# Copia seu arquivo de configuração apache.conf para o local correto do apache no container
+COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
+
 CMD ["apache2-foreground"]
