@@ -20,7 +20,7 @@ class Appointment extends Model
         'phone',
         'email',
         'observation',
-        'status',        
+        'status',
         'status_observation',
         'status_updated_at',
     ];
@@ -29,9 +29,13 @@ class Appointment extends Model
         'suggested_date' => 'date',
         'status_updated_at' => 'datetime',
     ];
-    public const STATUS_PENDENTE = 'Pendente';
-    public const STATUS_EM_ANDAMENTO = 'Em Andamento';
-    public const STATUS_CONCLUIDO = 'Concluido';
+    protected $with = [
+        'materials',
+        'statusLogs'
+    ];
+    public const STATUS_PENDENTE  = 'Pendente';
+    public const STATUS_AGENDADO  = 'Agendado';
+    public const STATUS_CONCLUIDO = 'Concluído';
     public const STATUS_CANCELADO = 'Cancelado';
     public function materials()
     {
@@ -40,6 +44,10 @@ class Appointment extends Model
 
     public function statusLogs()
     {
-        return $this->hasMany(StatusLog::class);
+        return $this->hasMany(StatusLog::class)->orderBy('created_at', 'desc');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

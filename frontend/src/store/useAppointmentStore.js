@@ -4,30 +4,63 @@ import axios from 'axios'
 export const useAppointmentStore = defineStore('appointments', {
   state: () => ({
     appointments: [],
+    appointment: '',
     lastAppointment: [],
     lastSuccess: false,
     loading: false,
-    error: null
+    error: null,
+    filters: {
+      search: '',
+      status: '',
+      suggested_date: '',
+      protocol: ''
+    },
+    pagination: {
+      currentPage: 1,
+      lastPage: 1,
+      perPage: 10,
+      total: 0
+    }
   }),
   actions: {
     async fetchAppointments() {
       this.loading = true
       this.error = null
       try {
-        const response = await axios.get('/api/appointments')
-        this.appointments = response.data.data
-        this.lastSuccess = true
+        const params = {}
+        if (this.filters.search) {
+          params.search = this.filters.search
+        }
+        if (this.filters.status) {
+          params.status = this.filters.status
+        }
+        if (this.filters.suggested_date) {
+          params.suggested_date = this.filters.suggested_date
+        }
+        if (this.filters.protocol) {
+          params.protocol = this.filters.protocol
+        }
+        params.page = this.pagination.currentPage
+        params.per_page = this.pagination.perPage
+
+        const response = await axios.get('/api/appointments', { params })
+        this.appointments = response.data.data.map(app => ({
+          ...app,
+          status_logs: app.status_logs || []
+        }))
+
+        this.pagination = {
+          currentPage: response.data.current_page,
+          lastPage: response.data.last_page,
+          perPage: response.data.per_page,
+          total: response.data.total
+        }
       } catch (err) {
         this.error = err.response?.data?.message || 'Erro ao carregar agendamentos'
       } finally {
         this.loading = false
       }
-    },
-    
-    clearSuccess() {
-      this.lastSuccess = false
-      this.lastAppointment = null
-    },
+    },  
 
     async createAppointment(data) {
       this.loading = true
@@ -35,6 +68,7 @@ export const useAppointmentStore = defineStore('appointments', {
       try {
         const response = await axios.post('/api/appointments', data)
         this.lastAppointment = response.data.appointment
+        this.lastSuccess = true
         return response.data
       } catch (err) {
         this.error = err.response?.data?.message || 'Erro ao agendar coleta'
@@ -43,17 +77,39 @@ export const useAppointmentStore = defineStore('appointments', {
         this.loading = false
       }
     },
-    async updateStatus(id, status, observations = '') {
+
+    clearSuccess() {
+      this.lastSuccess = false
+      this.lastAppointment = null
+    },
+
+    async updateStatus(id, status, observation = '') {
       this.loading = true
       this.error = null
       try {
-        await axios.patch(`/api/appointments/${id}/status`, { status, observations })
+        await axios.patch(`/api/appointments/${id}/status`, { status, observation })
         await this.fetchAppointments()
       } catch (err) {
         this.error = err.response?.data?.message || 'Erro ao atualizar status'
       } finally {
         this.loading = false
       }
+    },
+
+    resetFiltersAndReload() {
+      this.filters = {
+        search: '',
+        status: '',
+        date: '',
+        protocol: ''
+      }
+      this.pagination.currentPage = 1
+    },
+
+    setPage(page) {
+      this.pagination.currentPage = page
+      this.fetchAppointments()
     }
-  }
+  },
+
 })

@@ -79,6 +79,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/useAuthStore'
+import axios from 'axios'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -93,8 +94,8 @@ const error = ref('')
 const handleSubmit = async () => {
     error.value = ''
     try {
-        const res = await axios.post('/api/login', form)
-        authStore.setToken(res.data.token)
+        const response = await axios.post('/api/login', form)
+        authStore.setToken(response.data.token)
         router.push('/admin')
     } catch (err) {
         error.value = 'Credenciais inválidas'

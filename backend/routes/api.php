@@ -3,6 +3,7 @@
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\StatusLogController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,6 +26,10 @@ Route::middleware('auth:sanctum')->group(function () {
     
     //materials
     Route::apiResource('materials', MaterialController::class)->except('index');
+
+    //logs
+    Route::get('appointments/{appointment}/logs', [StatusLogController::class, 'index']);
+    Route::get('appointments/:id', [AppointmentController::class, 'show']);
 });
 
 

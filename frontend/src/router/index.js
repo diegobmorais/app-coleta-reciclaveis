@@ -5,7 +5,7 @@ import AdminLogin from '../views/admin/AdminLogin.vue'
 import AdminDashboard from '../views/admin/AdminDashboard.vue'
 import AppointmentDetails from '../views/appointment/AppointmentDetails.vue'
 import Materials from '../views/material/Materials.vue'
-import NotFound from '@/views/NotFound.vue'
+
 // Stores
 import { useAppointmentStore } from '@/store/useAppointmentStore'
 
@@ -37,18 +37,18 @@ const routes = [
     {
         path: '/admin',
         component: AdminDashboard,
-        // meta: { requiresAuth: true }
+        meta: { requiresAuth: true }
     },
     {
         path: '/admin/appointments/:id',
         component: AppointmentDetails,
-        // meta: { requiresAuth: true }
+        meta: { requiresAuth: true }
     },
     {
         path: '/admin/materials',
         component:
             Materials,
-        // meta: { requiresAuth: true }
+        meta: { requiresAuth: true }
     },  
 ]
 

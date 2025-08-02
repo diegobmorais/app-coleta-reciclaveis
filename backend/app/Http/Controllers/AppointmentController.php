@@ -20,12 +20,21 @@ class AppointmentController extends Controller
     {
         $query = Appointment::with('materials');
 
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw("unaccent(full_name) ILIKE unaccent(?)", ["%{$search}%"])
+                    ->orWhereRaw("unaccent(protocol) ILIKE unaccent(?)", ["%{$search}%"]);
+            });
+        }
+
         if ($request->filled('suggested_date')) {
             $query->whereDate('suggested_date', $request->suggested_date);
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->whereRaw('LOWER(status) = ?', [strtolower($request->status)]);
         }
 
         $query->orderBy('suggested_date', 'asc');
@@ -60,7 +69,7 @@ class AppointmentController extends Controller
                 'email' => $request->email,
                 'observation' => $request->observation,
                 'status' => Appointment::STATUS_PENDENTE,
-                'status_observation' => null                
+                'status_observation' => null
             ]);
 
             $appointment->materials()->sync($request->material_id);
@@ -90,8 +99,15 @@ class AppointmentController extends Controller
      */
     public function show($id)
     {
-        $appointment = Appointment::with('materials')->findOrFail($id);
-        return response()->json($appointment);
+        $appointment = Appointment::with([
+            'materials:id,name,category',
+            'statusLogs.user:id,name',
+            'user:id,name',
+        ])->findOrFail($id);
+
+        return response()->json([
+            'data' => $appointment
+        ]);
     }
 
     /**
@@ -103,16 +119,14 @@ class AppointmentController extends Controller
 
         DB::beginTransaction();
 
-        try {          
+        try {
             $appointment->status = $request->status;
-            $appointment->observation = $request->observation;
             $appointment->status_updated_at = Carbon::now();
             $appointment->save();
-         
+
             $appointment->statusLogs()->create([
                 'status' => $request->status,
-                'status_observation' => $request->observation ?? null,
-                'changed_at' => Carbon::now(),
+                'observation' => $request->observation ?? null,
                 'user_id' => auth()->id(),
             ]);
 

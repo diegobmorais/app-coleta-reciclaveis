@@ -10,9 +10,16 @@ class StatusLogController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($appointmentId)
     {
-        //
+        $logs = StatusLog::with([
+            'user:id,name',
+            'appointment:id,full_name'
+        ])->where('appointment_id', $appointmentId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($logs);
     }
 
     /**
