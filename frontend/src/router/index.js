@@ -16,7 +16,7 @@ const successGuard = (to, from, next) => {
     if (appointmentStore.lastSuccess) {
       next()
     } else {
-      next('/')
+      next('/login')
     }
   }
 
