@@ -181,7 +181,7 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppointmentStore } from '@/store/useAppointmentStore'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -196,6 +196,7 @@ onMounted(() => {
 
 const logout = () => {
     authStore.logout()   
+    router.push('/login')
 }
 
 const getStatusColor = (status) => {

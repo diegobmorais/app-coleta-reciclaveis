@@ -68,8 +68,7 @@ class AppointmentController extends Controller
                 'phone' => $request->phone,
                 'email' => $request->email,
                 'observation' => $request->observation,
-                'status' => Appointment::STATUS_PENDENTE,
-                'status_observation' => null
+                'status' => Appointment::STATUS_PENDENTE,               
             ]);
 
             $appointment->materials()->sync($request->material_id);

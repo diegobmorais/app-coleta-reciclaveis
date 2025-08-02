@@ -31,6 +31,7 @@
   <!-- Conteúdo Principal -->
   <main class="container mx-auto px-6 py-10">
     <RouterView />
+    <BaseToast ref="toastRef" />
   </main>
   <!-- Rodapé -->
   <footer class="bg-gray-900 text-gray-300 shadow-inner mt-auto border-t border-gray-800">
@@ -40,6 +41,14 @@
 
 <script setup>
 import { RouterLink } from 'vue-router'
+import BaseToast from '@/components/BaseToast.vue'
+import { onMounted, ref } from 'vue'
+
+const toastRef = ref(null)
+
+onMounted(() => {
+  window.$toast = toastRef.value
+})
 </script>
 
 <style>

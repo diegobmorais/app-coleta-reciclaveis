@@ -20,8 +20,7 @@ class Appointment extends Model
         'phone',
         'email',
         'observation',
-        'status',
-        'status_observation',
+        'status',        
         'status_updated_at',
     ];
 

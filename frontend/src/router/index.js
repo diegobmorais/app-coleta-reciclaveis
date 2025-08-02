@@ -46,8 +46,7 @@ const routes = [
     },
     {
         path: '/admin/materials',
-        component:
-            Materials,
+        component: Materials,
         meta: { requiresAuth: true }
     },  
 ]

@@ -66,15 +66,9 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Categoria *</label>
-                        <select v-model="form.category"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500">
-                            <option value="" disabled>Selecione uma categoria</option>
-                            <option value="plástico">Plástico</option>
-                            <option value="papel">Papel</option>
-                            <option value="metal">Metal</option>
-                            <option value="vidro">Vidro</option>
-                            <option value="eletrônico">Eletrônico</option>
-                        </select>
+                        <input v-model="form.category"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="Ex: (eletrônico, Plastico, Papel ...)" />                       
                         <p v-if="errors.category" class="text-red-500 text-sm mt-1">{{ errors.category }}</p>
                     </div>
 
@@ -119,7 +113,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ m.name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">{{ m.category
-                                    }}</span>
+                                }}</span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ m.description || '–' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -180,12 +174,12 @@ const saveMaterial = async () => {
 }
 
 const deleteMaterial = async (id) => {
-    if (!confirm('Tem certeza que deseja excluir este material?')) return
     try {
         await materialStore.deleteMaterial(id)
         if (editing.value === id) cancelEdit()
+        window.$toast?.showToast('Material excluído com sucesso!')
     } catch (err) {
-        alert('Erro ao excluir material.')
+        twindow.$toast?.showToast('Erro ao excluir material.')
     }
 }
 </script>
