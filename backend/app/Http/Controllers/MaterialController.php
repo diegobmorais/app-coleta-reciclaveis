@@ -2,54 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Material;
-use App\Http\Requests\StoreMaterialRequest;
 use Illuminate\Http\Request;
+use App\Models\Material;
+use App\Services\MaterialService;
+use App\Http\Requests\StoreMaterialRequest;
 
 class MaterialController extends Controller
 {
+    protected $service;
+
+    public function __construct(MaterialService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index(Request $request)
     {
-        $query = Material::query();
-      
-        if ($search = $request->input('search')) {
-            $query->where('name', 'ILIKE', "%{$search}%")
-                ->orWhere('description', 'ILIKE', "%{$search}%")
-                ->orWhere('category', 'ILIKE', "%{$search}%");
-        }
-     
-        $sortBy = $request->input('sort_by', 'name');
-        $sortDir = $request->input('sort_dir', 'asc');
+        $filters = $request->only(['search', 'sort_by', 'sort_dir', 'per_page']);
+        $materials = $this->service->getMaterials($filters);
 
-        if (in_array($sortBy, ['name', 'category', 'created_at']) && in_array($sortDir, ['asc', 'desc'])) {
-            $query->orderBy($sortBy, $sortDir);
-        }
-    
-        $perPage = $request->input('per_page', 10);
-
-        return $query->paginate($perPage);
+        return response()->json($materials);
     }
 
     public function store(StoreMaterialRequest $request)
     {
-        $material = Material::create($request->validated());
+        $material = $this->service->createMaterial($request->validated());
         return response()->json($material, 201);
     }
 
     public function show(Material $material)
     {
-        return $material;
+        return response()->json($material);
     }
 
     public function update(StoreMaterialRequest $request, Material $material)
     {
-        $material->update($request->validated());
+        $material = $this->service->updateMaterial($material, $request->validated());
         return response()->json($material);
     }
 
     public function destroy(Material $material)
     {
-        $material->delete();
+        $this->service->deleteMaterial($material);
         return response()->json(['message' => 'Material removido com sucesso.']);
     }
 }

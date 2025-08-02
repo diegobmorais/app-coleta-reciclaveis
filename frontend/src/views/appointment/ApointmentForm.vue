@@ -239,7 +239,8 @@ const validate = () => {
     neighborhood: 'Bairro é obrigatório.',
     city: 'Cidade é obrigatória.',
     suggested_date: 'Data sugerida é obrigatória.',
-    phone: 'Telefone é obrigatório.'
+    phone: 'Telefone é obrigatório.',
+    material_id : 'Escolha o material que deseja recolher.'
   }
 
   Object.keys(requiredFields).forEach(field => {
@@ -277,8 +278,8 @@ const validate = () => {
     }
   }
 
-  if (!form.material_ids || form.material_ids.length === 0) {
-    errors.value.material_ids = 'Selecione ao menos um material.'
+  if (!form.material_id || form.material_id.length === 0) {
+    errors.value.material_id = 'Selecione ao menos um material.'
     isValid = false
   }
 
@@ -286,13 +287,11 @@ const validate = () => {
 }
 
 const handleSubmit = async () => {
-  if (!validate()) return
-
+  if (!validate()) return    
   loading.value = true
   try {
     const payload = {
-      ...form,
-      date: form.suggested_date,
+      ...form,      
     }
     await appointmentStore.createAppointment(payload)
     router.push('/success')
@@ -312,7 +311,7 @@ const handleSubmit = async () => {
           phone: 'phone',
           email: 'email',
           observation: 'observation',
-          material_ids: 'material_id'
+          material_id: 'material_id'
         }[field]
 
         if (formField) {
