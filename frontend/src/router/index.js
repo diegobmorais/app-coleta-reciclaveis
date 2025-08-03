@@ -8,17 +8,18 @@ import Materials from '../views/material/Materials.vue'
 
 // Stores
 import { useAppointmentStore } from '@/store/useAppointmentStore'
+import { useAuthStore } from '@/store/useAuthStore'
 
 // Guard para proteger /success
 const successGuard = (to, from, next) => {
     const appointmentStore = useAppointmentStore()
-  
+
     if (appointmentStore.lastSuccess) {
-      next()
+        next()
     } else {
-      next('/login')
+        next('/login')
     }
-  }
+}
 
 const routes = [
     {
@@ -28,7 +29,7 @@ const routes = [
     {
         path: '/success',
         component: AppointmentSuccess,
-        beforeEnter: successGuard 
+        beforeEnter: successGuard
     },
     {
         path: '/login',
@@ -48,7 +49,7 @@ const routes = [
         path: '/admin/materials',
         component: Materials,
         meta: { requiresAuth: true }
-    },  
+    },
 ]
 
 const router = createRouter({
@@ -56,10 +57,17 @@ const router = createRouter({
     routes
 })
 
-router.beforeEach((to, from, next) => {
-    const isAuthenticated = !!localStorage.getItem('authToken')
-    if (to.meta.requiresAuth && !isAuthenticated) {
+router.beforeEach(async (to, from, next) => {
+    const auth = useAuthStore()
+
+    if (auth.isLoading) {
+        await auth.initializeAuth()
+    }
+
+    if (to.meta.requiresAuth && !auth.isAuthenticated) {
         next('/login')
+    } else if (to.path === '/login' && auth.isAuthenticated) {
+        next('/admin')
     } else {
         next()
     }

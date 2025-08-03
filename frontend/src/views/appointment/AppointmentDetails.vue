@@ -143,18 +143,17 @@ import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppointmentStore } from '@/store/useAppointmentStore'
 import StatusLogs from '../../components/StatusLogs.vue'
-import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
 const appointmentStore = useAppointmentStore()
 
-const appointment = ref(null)
 const isModalOpen = ref(false)
 const status = ref('')
 const observation = ref('')
 const errors = ref({})
 
+const appointment = computed(() => appointmentStore.appointment)
 const isObservationRequired = computed(() => {
     return ['Concluído', 'Cancelado'].includes(status.value)
 })
@@ -163,15 +162,9 @@ onMounted(() => fetchAppointment())
 
 const fetchAppointment = async () => {
     try {
-        const response = await axios.get(`/api/appointments/${route.params.id}`)
-        appointment.value = response.data.data
-
+        await appointmentStore.fetchAppointmentById(route.params.id)
     } catch (err) {
-        if (err.response?.status === 404) {
-            console.error('Agendamento não encontrado', err)
-        } else {
-            console.error('Erro ao carregar detalhes', err)
-        }
+        console.error('Erro ao carregar agendamento:', err)
     }
 }
 
@@ -194,10 +187,10 @@ const updateStatus = async () => {
         return
     }
     try {
-        await appointmentStore.updateStatus(appointment.value.id, status.value, observation.value)
-        appointment.value.status = status.value
-        appointment.value.status_observation = observation.value
-        appointment.value.status_updated_at = new Date().toISOString()
+        await appointmentStore.updateStatus(
+            appointmentStore.appointment.id,
+            status.value,
+            observation.value)
 
         isModalOpen.value = false
     } catch (err) {

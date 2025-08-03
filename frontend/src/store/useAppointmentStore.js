@@ -60,7 +60,29 @@ export const useAppointmentStore = defineStore('appointments', {
       } finally {
         this.loading = false
       }
-    },  
+    },
+
+    async fetchAppointmentById(id) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await axios.get(`/api/appointments/${id}`)
+        this.appointment = response.data.data
+        return response.data.data
+      } catch (err) {
+        if (err.response?.status === 404) {
+          this.error = 'Agendamento não encontrado'
+        } else {
+          this.error = err.response?.data?.message || 'Erro ao carregar detalhes do agendamento'
+        }
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+    clearCurrentAppointment() {
+      this.appointment = null
+    },
 
     async createAppointment(data) {
       this.loading = true
@@ -87,10 +109,16 @@ export const useAppointmentStore = defineStore('appointments', {
       this.loading = true
       this.error = null
       try {
-        await axios.patch(`/api/appointments/${id}/status`, { status, observation })
-        await this.fetchAppointments()
+        const response = await axios.patch(`/api/appointments/${id}/status`, { status, observation })
+
+        if (this.appointment && this.appointment.id === id) {
+          this.appointment = response.data.appointment
+        }
+        
+        return response.data.appointment
       } catch (err) {
         this.error = err.response?.data?.message || 'Erro ao atualizar status'
+        throw err 
       } finally {
         this.loading = false
       }

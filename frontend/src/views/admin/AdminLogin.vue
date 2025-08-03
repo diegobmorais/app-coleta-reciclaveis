@@ -93,12 +93,13 @@ const error = ref('')
 
 const handleSubmit = async () => {
     error.value = ''
-    try {
-        const response = await axios.post('/api/login', form)
-        authStore.setToken(response.data.token)
+
+    const success = await authStore.login(form)
+
+    if (success) {
         router.push('/admin')
-    } catch (err) {
-        error.value = 'Credenciais inválidas'
-    }
+    } else {
+        aerror.value = 'Credenciais inválidas'
+    } 
 }
 </script>

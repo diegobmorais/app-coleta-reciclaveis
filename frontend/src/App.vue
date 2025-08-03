@@ -1,8 +1,7 @@
 <template>
   <!-- Cabeçalho -->
   <header class="bg-gradient-to-r from-green-800 to-emerald-700 text-white shadow-lg fixed top-0 left-0 w-full z-50">
-    <div class="container mx-auto px-6 py-5 flex flex-wrap md:flex-nowrap items-center justify-between">
-      <!-- Logo / Título -->
+    <div class="container mx-auto px-6 py-5 flex flex-wrap md:flex-nowrap items-center justify-between">    
       <RouterLink to="/">
         <div class="flex items-center space-x-3">
           <div class="bg-white p-2 rounded-full">
@@ -42,6 +41,8 @@
 
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/store/useAuthStore'
 
 const router = useRouter()
 
@@ -52,6 +53,11 @@ const goToAdminArea = () => {
   } else {
     router.push('/login')
   }
+
+  onMounted(async () => {
+    const auth = useAuthStore()
+    await auth.initializeAuth()
+  })
 }
 </script>
 

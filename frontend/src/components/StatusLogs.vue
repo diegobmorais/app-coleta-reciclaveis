@@ -2,7 +2,7 @@
     <div>
         <button type="button" @click="isModalOpen = true"
             class="text-blue-600 hover:text-blue-800 text-sm font-medium underline">
-            Ver logs de atualização
+            Histórico de Atualizações
         </button>
     </div>
     <!-- Modal -->
@@ -78,8 +78,6 @@ const props = defineProps({
 })
 
 const getAuthorName = (log) => {
-    console.log('data', log);
-
     if (log.user) {
         return log.user.name
     }

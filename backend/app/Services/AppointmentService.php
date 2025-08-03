@@ -23,15 +23,15 @@ class AppointmentService
         return $this->appointmentRepository->filterAppointments($filters);
     }
     public function createAppointment(array $data): Appointment
-    {
+    {  
         return DB::transaction(function () use ($data) {
             do {
                 $protocol = 'COLETA-' . strtoupper(Str::random(8));
             } while ($this->appointmentRepository->existsProtocol($protocol));
 
             $data['protocol'] = $protocol;
-            $data['status'] = Appointment::STATUS_PENDENTE;
-
+            $data['status'] = Appointment::STATUS_PENDENTE;   
+                 
             $appointment = $this->appointmentRepository->create($data);
 
             if (!empty($data['material_id'])) {

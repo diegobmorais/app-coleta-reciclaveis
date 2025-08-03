@@ -33,6 +33,7 @@ class StoreAppointmentRequest extends FormRequest
             'suggested_date' => ['required', 'date', 'after_or_equal:' . $minDate],
             'phone' => ['required', 'string', 'regex:/^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/'],
             'email' => ['nullable', 'email'],
+            'observation' => ['nullable'],
             'material_id' => ['required', 'array', 'min:1'],
             'material_id.*' => ['exists:materials,id'],
         ];

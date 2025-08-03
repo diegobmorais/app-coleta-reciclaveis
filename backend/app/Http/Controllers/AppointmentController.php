@@ -23,7 +23,7 @@ class AppointmentController extends Controller
         return response()->json($appointments, 200);
     }
     public function store(StoreAppointmentRequest $request)
-    {
+    {    
         try {
             $appointment = $this->appointmentService->createAppointment($request->validated());
 
