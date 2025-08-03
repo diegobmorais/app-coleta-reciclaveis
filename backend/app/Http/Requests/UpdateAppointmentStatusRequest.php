@@ -26,6 +26,7 @@ class UpdateAppointmentStatusRequest extends FormRequest
             'status' => ['required', Rule::in(['Pendente', 'Agendado', 'Concluído', 'Cancelado'])],
             'observation' => [
                 'required_if:status,Concluído,Cancelado',
+                'nullable',
                 'string',
                 'max:1000',
             ],
