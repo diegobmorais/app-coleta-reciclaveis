@@ -92,10 +92,10 @@ const appointment = ref(null)
 
 
 onMounted(() => {
-  const lastAppointment = appointmentStore.lastAppointment 
+  const lastAppointment = appointmentStore.lastAppointment
   if (lastAppointment) {
     appointment.value = lastAppointment
-  } else {   
+  } else {
     router.push('/')
   }
 
@@ -105,17 +105,23 @@ onMounted(() => {
   appointmentStore.clearSuccess()
 })
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
-}
+const formatDate = (date) => {
+  if (!date) return '–'
 
-const formatTime = (timeString) => {
-  return timeString || 'Não informado'
+  let dateStr = date
+
+  if (date instanceof Date) {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    dateStr = `${year}-${month}-${day}`
+  }
+  else if (typeof date === 'string') {
+    dateStr = date.split('T')[0] 
+  }
+
+  const [year, month, day] = dateStr.split('-')
+  return `${day}/${month}/${year}`
 }
 
 const selectedMaterials = computed(() => {

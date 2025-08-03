@@ -108,7 +108,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Data Sugerida *</label>
-            <input v-model="form.suggested_date" type="date"
+            <input v-model="form.suggested_date" type="date" :min="getMinSuggestedDate()"
               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500" />
             <p v-if="errors.suggested_date" class="text-red-500 text-sm mt-1">{{ errors.suggested_date }}</p>
           </div>
@@ -118,7 +118,7 @@
             </label>
             <!-- Dropdown Controlado -->
             <div ref="dropdownRef" class="relative">
-              <button type="button" @click="toggleDropdown"
+              <button type="button" data-testid="toggle-materials" @click="toggleDropdown"
                 class="w-full text-left px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
                 <span v-if="form.material_id.length === 0" class="text-gray-500">Selecione os materiais...</span>
                 <span v-else>
@@ -143,6 +143,7 @@
                     <label v-for="material in materialStore.materials" :key="material.id"
                       class="flex items-center space-x-3 px-3 py-2 cursor-pointer hover:bg-green-50 rounded text-sm">
                       <input type="checkbox" :value="material.id" v-model="form.material_id"
+                        :data-testid="`material-checkbox-${material.id}`"
                         class="h-4 w-4 text-green-600 rounded focus:ring-green-500" @change.stop />
                       <span class="flex-1">
                         {{ material.name }}
@@ -240,7 +241,7 @@ const validate = () => {
     city: 'Cidade é obrigatória.',
     suggested_date: 'Data sugerida é obrigatória.',
     phone: 'Telefone é obrigatório.',
-    material_id : 'Escolha o material que deseja recolher.'
+    material_id: 'Escolha o material que deseja recolher.'
   }
 
   Object.keys(requiredFields).forEach(field => {
@@ -258,22 +259,13 @@ const validate = () => {
 
   if (form.suggested_date) {
     const selectedDate = new Date(form.suggested_date)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const minDate = getMinSuggestedDate()
 
-    const minDate = new Date(today)
-    let daysAdded = 0
-    while (daysAdded < 2) {
-      minDate.setDate(minDate.getDate() + 1)
-      const dayOfWeek = minDate.getDay()
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        daysAdded++
-      }
-    }
-
-    if (selectedDate < minDate) {
-      const minDateStr = minDate.toLocaleDateString('pt-BR')
-      errors.value.suggested_date = `A data deve ser pelo menos ${minDateStr}.`
+    if (isNaN(selectedDate.getTime())) {
+      errors.value.suggested_date = 'Data inválida.'
+      isValid = false
+    } else if (selectedDate < minDate) {
+      errors.value.suggested_date = 'A data deve ser pelo menos 2 dias úteis após a data atual.'
       isValid = false
     }
   }
@@ -286,12 +278,26 @@ const validate = () => {
   return isValid
 }
 
+function getMinSuggestedDate() {
+  const date = new Date()
+  date.setHours(0, 0, 0, 0)
+  let weekdays = 0
+  while (weekdays < 2) {
+    date.setDate(date.getDate() + 1)
+    const day = date.getDay()
+    if (day !== 0 && day !== 6) {
+      weekdays++
+    }
+  }
+  return date.toISOString().split('T')[0]
+}
+
 const handleSubmit = async () => {
-  if (!validate()) return    
+  if (!validate()) return
   loading.value = true
   try {
     const payload = {
-      ...form,      
+      ...form,
     }
     await appointmentStore.createAppointment(payload)
     router.push('/success')

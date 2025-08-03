@@ -22,7 +22,7 @@ class StoreAppointmentRequest extends FormRequest
      */
     public function rules(): array
     {   
-        $minDate = Carbon::now()->addWeekdays(2)->format('Y-m-d');
+        $minDate = Carbon::now()->startOfDay()->addWeekdays(2)->format('Y-m-d');
 
         return [
             'full_name' => ['required', 'string', 'max:255'],
